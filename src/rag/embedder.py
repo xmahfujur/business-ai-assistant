@@ -31,8 +31,9 @@ def main():
         
         for chunk, embedding in zip(chunks, all_embeddings):
             chunk.embedding = embedding
-        
+            return embedding
         print("Embeddings successfully mapped back to text nodes!")
+        
         
 if __name__ == '__main__':
     main()

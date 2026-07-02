@@ -1,0 +1,14 @@
+.env
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+temp_dir/
+
+chroma_db/
+*.bin
+*.pickle
+
+.DS_Store
+Thumbs.db

@@ -1,26 +1,18 @@
-from llama_index.core import VectorStoreIndex, StorageContext
-from llama_index.vector_stores.chroma import ChromaVectorStore
-from llama_index.llms.google_genai import GoogleGenAI
-from src.config.config import GEMINI_API_KEY
-import chromadb
-from llama_index.core import Settings
-from llama_index.embeddings.huggingface import HuggingFaceEmbedding
+"""Backward-compatible entry point. Prefer src.rag.engine for new code."""
 
-# 1. Re-initialize your environment
-Settings.llm = GoogleGenAI(model='gemini-2.5-flash')
-Settings.embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-en-v1.5")
+from src.rag.engine import get_query_engine, query_documents, rebuild_index
 
-# 2. Connect to your existing database
-db = chromadb.PersistentClient(path="./chroma_db")
-chroma_collection = db.get_or_create_collection("my_knowledge_base")
-vector_store = ChromaVectorStore(chroma_collection=chroma_collection)
+query_engine = None
 
-# 3. Load the index from the database
-index = VectorStoreIndex.from_vector_store(vector_store)
 
-# 4. Create the query engine
-query_engine = index.as_query_engine()
+def _ensure_engine():
+    global query_engine
+    if query_engine is None:
+        query_engine = get_query_engine()
+    return query_engine
 
-# 5. Ask a question!
-response = query_engine.query("What are the key points in the AI Engineering book?")
-print(response)
+
+def __getattr__(name):
+    if name == "query_engine":
+        return _ensure_engine()
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
